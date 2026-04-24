@@ -16,11 +16,21 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 var jobQueue = make(chan string, 100)
 
 // TODO: write a worker() function that loops over jobQueue and processes each job.
+
+func worker(id int) {
+    for job := range jobQueue {
+     	fmt.Printf("Worker %d START %s\n", id, job)
+			time.Sleep(2 * time.Second)
+		fmt.Printf("Worker %d DONE %s\n", id, job)
+    }
+
+}
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	jobQueue <- "new job"
@@ -29,6 +39,9 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// TODO: start one or more workers here with the `go` keyword.
+	for i := 1; i <= 10; i++ {
+		go worker(i)
+	}
 
 	http.HandleFunc("/upload", uploadHandler)
 	log.Println("starter server listening on :8081")
